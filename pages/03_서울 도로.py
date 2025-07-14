@@ -1,23 +1,29 @@
 import streamlit as st
+import pandas as pd
 import folium
-from streamlit.components.v1 import components
+from streamlit.components.v1 import html
 
-st.set_page_config(page_title="서울에서 가장 붐비는 도로", layout="wide")
-st.title("🚦 서울에서 가장 혼잡한 도로 시각화 (Folium)")
+st.set_page_config(layout="wide")
+st.title("🚦 서울 혼잡 도로 지도 (Folium)")
 
-# 가장 혼잡한 서울 도로 예시 (강남대로 구간)
-road_name = "강남대로"
-location = [37.498095, 127.027610]  # 강남역 인근
+# 서울 혼잡 도로 예시
+roads = pd.DataFrame({
+    "도로명": ["강남대로", "올림픽대로", "서부간선도로"],
+    "위도": [37.4981, 37.5202, 37.4833],
+    "경도": [127.0276, 127.1033, 126.8829],
+})
 
-# 지도 생성
-m = folium.Map(location=location, zoom_start=15)
-folium.Marker(
-    location,
-    popup=f"{road_name} (혼잡도 상위)",
-    tooltip="강남대로",
-    icon=folium.Icon(color="red")
-).add_to(m)
+# folium 지도 생성
+m = folium.Map(location=[37.5, 127.0], zoom_start=11)
 
-# HTML로 렌더링
-folium_html = m._repr_html_()
-components.html(folium_html, height=500)
+# 마커 추가
+for _, row in roads.iterrows():
+    folium.Marker(
+        location=[row["위도"], row["경도"]],
+        popup=row["도로명"],
+        tooltip=row["도로명"],
+        icon=folium.Icon(color="red")
+    ).add_to(m)
+
+# 지도 출력
+html(m._repr_html_(), height=600)
