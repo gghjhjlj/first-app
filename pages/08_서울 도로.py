@@ -91,3 +91,43 @@ for ft in roads["features"]:
 df_stat = pd.DataFrame(stats, columns=["상태", "count"]).groupby("상태").sum().reset_index()
 st.subheader("📊 상태별 도로 구간 수")
 st.bar_chart(df_stat.set_index("상태"))
+
+# 예시 도로 추가
+{
+    "type": "Feature",
+    "properties": {"name": "한강대로", "congestion": 65},
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [[126.970, 37.554], [126.973, 37.558]]
+    }
+},
+{
+    "type": "Feature",
+    "properties": {"name": "올림픽대로", "congestion": 90},
+    "geometry": {
+        "type": "LineString",
+        "coordinates": [[126.950, 37.520], [126.980, 37.523]]
+    }
+}
+
+from branca.element import Template, MacroElement
+
+legend_html = """
+{% macro html() %}
+<div style="
+    position: fixed; 
+    bottom: 50px; left: 50px; width: 150px; height: 110px; 
+    background-color: white; 
+    border:2px solid grey; z-index:9999; font-size:14px;
+    padding: 10px;">
+    <b>혼잡도 범례</b><br>
+    <i style="background:red; width:10px; height:10px; display:inline-block;"></i> 정체 (80 이상)<br>
+    <i style="background:orange; width:10px; height:10px; display:inline-block;"></i> 지체 (40 이상)<br>
+    <i style="background:green; width:10px; height:10px; display:inline-block;"></i> 원활 (40 미만)
+</div>
+{% endmacro %}
+"""
+
+legend = MacroElement()
+legend._template = Template(legend_html)
+m.get_root().add_child(legend)
