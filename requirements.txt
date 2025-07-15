@@ -24,3 +24,8 @@ pandas
 folium
 streamlit-folium
 plotly
+
+streamlit
+pandas
+plotly
+
