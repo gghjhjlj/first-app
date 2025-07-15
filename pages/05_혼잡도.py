@@ -1,5 +1,5 @@
+import streamlit as stst.set_page_config(page_title="TomTom Traffic Index 분석", layout="wide")
 
-st.set_page_config(page_title="TomTom Traffic Index 분석", layout="wide")
 st.title("🚗 TomTom Traffic Index - 국가/도시별 혼잡도 분석")
 st.write("Kaggle에서 제공하는 TomTom 교통 혼잡도 데이터를 가져와 시각화합니다.")
 
