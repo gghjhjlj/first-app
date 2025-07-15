@@ -33,4 +33,4 @@ selected = st.selectbox("국가를 선택하세요:", df["국가"])
 country = df[df["국가"] == selected].iloc[0]
 st.markdown(f"### 🌎 {country['국가']}")
 st.write(f"**총 CO₂ 배출량**: {country['총배출량(Mt)']:,} Mt")
-st.write(f"**1인당 CO₂ 배출량**: {country['1인당 배출량(t)']} t")
+st.write(f"**1인당 CO₂ 배출량**: {country['1인당 배출량(t)']} t") 
