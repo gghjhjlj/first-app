@@ -1,3 +1,4 @@
+# 📄 pages/05_혼잡도.py
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -14,9 +15,9 @@ if uploaded_file is not None:
     expected_cols = ["country", "city", "year", "month", "day", "weekday", "hour", "congestion_index"]
     if all(col in df.columns for col in expected_cols):
         df = df[expected_cols]
-        df.columns = ["국가","도시","연도","월","일","요일","시간","혼잡도"]
+        df.columns = ["국가", "도시", "연도", "월", "일", "요일", "시간", "혼잡도"]
 
-        st.write("데이터 샘플:")
+        st.write("📄 데이터 샘플:")
         st.dataframe(df.head())
 
         country = st.selectbox("국가 선택", sorted(df["국가"].unique()))
@@ -24,21 +25,21 @@ if uploaded_file is not None:
         sub = df[(df["국가"] == country) & (df["도시"] == city)]
 
         st.write(f"### {country} - {city} 교통 혼잡도 추이")
-        fig = px.line(sub, x="시간", y="혼잡도", color="요일", markers=True,
-                      labels={"혼잡도":"혼잡도(%)","시간":"시간대"})
+        fig = px.line(sub, x="시간", y="혼잡도", color="요일", markers=True)
         st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("🚦 혼잡도 Top 10 도시 (평균 기준)")
-        agg = df.groupby(["국가","도시"])["혼잡도"].mean().reset_index()
-        top10 = agg.sort_values("혼잡도", ascending=False).head(10)
+        top10 = df.groupby(["국가", "도시"])["혼잡도"].mean().reset_index()
+        top10 = top10.sort_values(by="혼잡도", ascending=False).head(10)
         fig2 = px.bar(top10, x="도시", y="혼잡도", color="국가")
         st.plotly_chart(fig2, use_container_width=True)
 
-        st.subheader("📈 연도별 평균 혼잡도 변화")
+        st.subheader("📈 연도별 혼잡도 변화 추이")
         trend = df.groupby("연도")["혼잡도"].mean().reset_index()
         fig3 = px.line(trend, x="연도", y="혼잡도", markers=True)
         st.plotly_chart(fig3, use_container_width=True)
     else:
-        st.error("CSV에 필요한 컬럼이 없습니다: " + ", ".join(expected_cols))
+        st.error("CSV에 다음 컬럼이 포함되어야 합니다:\n" + ", ".join(expected_cols))
 else:
-    st.info("CSV 파일을 먼저 업로드하세요.")
+    st.info("CSV 파일을 업로드하세요.")
+
