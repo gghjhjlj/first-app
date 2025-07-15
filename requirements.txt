@@ -18,3 +18,9 @@ folium
 streamlit-folium
 pycountry
 requests
+
+streamlit
+pandas
+folium
+streamlit-folium
+plotly
