@@ -1,36 +1,57 @@
 import streamlit as st
 import pandas as pd
+import folium
+from streamlit_folium import st_folium
 
-st.set_page_config(page_title="OECD 국가 CO₂ 배출 비교", layout="wide")
+# 페이지 설정
+st.set_page_config(page_title="세계 이산화탄소 배출량", layout="wide")
+st.title("🌍 세계 국가별 이산화탄소 배출량 시각화")
 
-st.title("🌍 OECD 국가 이산화탄소(CO₂) 배출 비교")
-st.write("주요 OECD 국가들의 연간 CO₂ 배출 총량과 1인당 배출량을 비교합니다.")
+# 데이터 업로드 또는 예제 데이터 불러오기
+uploaded_file = st.file_uploader("CSV 파일 업로드 (country, co2 columns 포함)", type=["csv"])
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+else:
+    # 예제 데이터 (나라명과 CO2 배출량 - 실제 분석에는 정확한 데이터를 사용하세요)
+    df = pd.DataFrame({
+        'country': ['United States', 'China', 'India', 'Russia', 'Germany', 'South Korea'],
+        'co2': [5000, 10000, 3000, 2000, 1500, 700]
+    })
 
-# 예시 데이터 (실제 수치는 공개된 자료 기준 대략적임)
-data = [
-    {"국가": "미국", "총배출량(Mt)": 5000, "1인당 배출량(t)": 15.2},
-    {"국가": "일본", "총배출량(Mt)": 1100, "1인당 배출량(t)": 8.7},
-    {"국가": "독일", "총배출량(Mt)": 750, "1인당 배출량(t)": 9.1},
-    {"국가": "한국", "총배출량(Mt)": 650, "1인당 배출량(t)": 12.4},
-    {"국가": "프랑스", "총배출량(Mt)": 320, "1인당 배출량(t)": 4.9},
-    {"국가": "영국", "총배출량(Mt)": 400, "1인당 배출량(t)": 5.8},
-    {"국가": "캐나다", "총배출량(Mt)": 550, "1인당 배출량(t)": 14.6},
-    {"국가": "호주", "총배출량(Mt)": 400, "1인당 배출량(t)": 16.9},
-    {"국가": "이탈리아", "총배출량(Mt)": 350, "1인당 배출량(t)": 5.7},
-    {"국가": "스페인", "총배출량(Mt)": 280, "1인당 배출량(t)": 5.9}
-]
+# 국가명 → ISO 3-letter 코드 변환
+import pycountry
 
-df = pd.DataFrame(data)
+def get_country_code(name):
+    try:
+        return pycountry.countries.lookup(name).alpha_3
+    except:
+        return None
 
-# 표 표시
-st.subheader("📊 OECD 주요국 CO₂ 배출 데이터")
-st.dataframe(df, use_container_width=True)
+df["iso_code"] = df["country"].apply(get_country_code)
+df = df.dropna(subset=["iso_code"])
 
-# 국가 선택
-st.subheader("🔍 국가별 상세 정보")
-selected = st.selectbox("국가를 선택하세요:", df["국가"])
+# GeoJSON 데이터 불러오기 (세계 지도)
+import json
+import requests
+url = "https://raw.githubusercontent.com/python-visualization/folium/master/examples/data/world-countries.json"
+geo_json = requests.get(url).json()
 
-country = df[df["국가"] == selected].iloc[0]
-st.markdown(f"### 🌎 {country['국가']}")
-st.write(f"**총 CO₂ 배출량**: {country['총배출량(Mt)']:,} Mt")
-st.write(f"**1인당 CO₂ 배출량**: {country['1인당 배출량(t)']} t") 
+# folium 지도 생성
+m = folium.Map(location=[20, 0], zoom_start=2, tiles="cartodbpositron")
+
+# Choropleth 레이어 추가
+folium.Choropleth(
+    geo_data=geo_json,
+    name='choropleth',
+    data=df,
+    columns=['iso_code', 'co2'],
+    key_on='feature.id',
+    fill_color='YlOrRd',
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_name='이산화탄소 배출량 (단위: 백만 톤)',
+).add_to(m)
+
+# 지도 표시
+st.subheader("📌 국가별 CO₂ 배출 지도")
+st_data = st_folium(m, width=900)
