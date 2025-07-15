@@ -2,11 +2,12 @@ import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
+import requests
 
 st.set_page_config(page_title="서울 자치구 인구", layout="wide")
 st.title("🗺️ 서울 25개 자치구 인구 시각화")
 
-# 서울 자치구 인구 데이터 (2023년 기준 샘플)
+# 자치구 인구 (2023년 기준 샘플)
 data = {
     "자치구": [
         "강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구",
@@ -21,14 +22,15 @@ data = {
 }
 df = pd.DataFrame(data)
 
-# GeoJSON 파일 불러오기 (같은 디렉토리에 있어야 함)
-with open("seoul_municipalities_geo.json", encoding="utf-8") as f:
-    seoul_geo = f.read()
+# ✅ GeoJSON 데이터 자동 가져오기
+geo_url = (
+    "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/"
+    "kostat/2013/json/skorea_municipalities_geo_simple.json"
+)
+seoul_geo = requests.get(geo_url).json()
 
-# 중심 좌표 설정
-m = folium.Map(location=[37.5665, 126.9780], zoom_start=11)
-
-# 인구 데이터를 기준으로 색상 입히기
+# Folium 지도 준비
+m = folium.Map(location=[37.5665, 126.9780], zoom_start=11, tiles="cartodbpositron")
 folium.Choropleth(
     geo_data=seoul_geo,
     data=df,
@@ -37,13 +39,12 @@ folium.Choropleth(
     fill_color="YlOrRd",
     fill_opacity=0.7,
     line_opacity=0.3,
-    legend_name="서울 자치구별 인구수"
+    legend_name="서울 자치구별 인구 수"
 ).add_to(m)
 
-# 지도 표시
-st.subheader("서울 자치구 인구 지도")
+st.subheader("📍 서울 자치구 인구 지도")
 st_data = st_folium(m, width=800, height=600)
 
-# 표도 함께 표시
-st.subheader("서울 자치구 인구 표")
+# 인구 표도 함께 제공
+st.subheader("📋 자치구별 인구 DataFrame")
 st.dataframe(df, use_container_width=True)
