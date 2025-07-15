@@ -3,11 +3,6 @@ import pandas as pd
 import folium
 from streamlit_folium import st_folium
 
-import requests
-
-geo_url = "https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea-municipalities-2013-geo.json"
-seoul_geo = requests.get(geo_url).json()
-
 st.set_page_config(page_title="서울 자치구 인구", layout="wide")
 st.title("🗺️ 서울 25개 자치구 인구 시각화")
 
