@@ -3,4 +3,5 @@ folium
 pandas
 streamlit_folium
 kagglehub
+streamlit
 ploty
