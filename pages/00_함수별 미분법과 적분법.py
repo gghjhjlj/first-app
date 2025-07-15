@@ -1,42 +1,45 @@
 import streamlit as st
+import numpy as np
+import sympy as sp
+import plotly.graph_objects as go
 
-# 제목
-st.title("함수 유형별 미분법 & 적분법 안내기")
-st.write("함수의 종류를 선택하면 적절한 미분법과 적분법을 알려드려요!")
+# Streamlit 설정
+st.set_page_config(page_title="📈 미분 시각화", layout="centered")
+st.title("📐 함수 · 도함수 · 접선 시각화")
 
-# 함수 유형 목록
-function_types = {
-    "다항함수": {
-        "미분법": "항별로 미분 (거듭제곱의 미분: d/dx [xⁿ] = n·xⁿ⁻¹)",
-        "적분법": "항별로 적분 (거듭제곱의 적분: ∫xⁿ dx = xⁿ⁺¹ / (n+1) + C)"
-    },
-    "지수함수": {
-        "미분법": "지수함수의 미분 (d/dx [eˣ] = eˣ, d/dx [aˣ] = aˣ·ln(a))",
-        "적분법": "지수함수의 적분 (∫eˣ dx = eˣ + C, ∫aˣ dx = aˣ / ln(a) + C)"
-    },
-    "로그함수": {
-        "미분법": "로그함수의 미분 (d/dx [ln(x)] = 1/x)",
-        "적분법": "로그함수의 적분 (∫1/x dx = ln|x| + C)"
-    },
-    "삼각함수": {
-        "미분법": "삼각함수의 미분 (예: d/dx [sin(x)] = cos(x), d/dx [cos(x)] = -sin(x))",
-        "적분법": "삼각함수의 적분 (예: ∫sin(x) dx = -cos(x) + C, ∫cos(x) dx = sin(x) + C)"
-    },
-    "역삼각함수": {
-        "미분법": "역삼각함수의 미분 (예: d/dx [arcsin(x)] = 1/√(1−x²))",
-        "적분법": "역삼각함수의 적분 (예: ∫1/√(1−x²) dx = arcsin(x) + C)"
-    },
-    "하이퍼볼릭 함수": {
-        "미분법": "쌍곡함수의 미분 (예: d/dx [sinh(x)] = cosh(x))",
-        "적분법": "쌍곡함수의 적분 (예: ∫cosh(x) dx = sinh(x) + C)"
-    }
-}
+# 사용자 입력
+func_input = st.text_input("함수를 입력하세요 (예: sin(x), x**2 + 3*x):", "x**2")
+x_val = st.slider("접선을 그릴 x 위치 선택", -10, 10, value=1)
 
-# 선택 UI
-selected_type = st.selectbox("함수의 유형을 선택하세요:", list(function_types.keys()))
+# 수학 준비
+x = sp.Symbol('x')
+try:
+    func_expr = sp.sympify(func_input)
+    deriv_expr = sp.diff(func_expr, x)
 
-# 결과 출력
-if selected_type:
-    st.subheader(f"✅ {selected_type}에 적합한 미분법과 적분법")
-    st.markdown(f"**📘 미분법:** {function_types[selected_type]['미분법']}")
-    st.markdown(f"**📗 적분법:** {function_types[selected_type]['적분법']}")
+    f = sp.lambdify(x, func_expr, 'numpy')
+    f_prime = sp.lambdify(x, deriv_expr, 'numpy')
+
+    # x 값 범위
+    x_vals = np.linspace(x_val - 5, x_val + 5, 400)
+    y_vals = f(x_vals)
+    slope = f_prime(x_val)
+    tangent_y = slope * (x_vals - x_val) + f(x_val)
+
+    # 그래프 그리기
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x_vals, y=y_vals, name="함수", line=dict(color='blue')))
+    fig.add_trace(go.Scatter(x=x_vals, y=tangent_y, name="접선", line=dict(color='red', dash='dash')))
+    fig.add_trace(go.Scatter(x=[x_val], y=[f(x_val)], mode='markers+text', name='접점',
+                             marker=dict(size=8, color='black'),
+                             text=[f"x={x_val}, f(x)={f(x_val):.2f}"],
+                             textposition="top right"))
+
+    fig.update_layout(title=f"f(x) = {func_expr}, f'(x) = {deriv_expr}, 기울기 = {slope:.2f}",
+                      xaxis_title="x", yaxis_title="y",
+                      height=500)
+
+    st.plotly_chart(fig, use_container_width=True)
+
+except Exception as e:
+    st.error(f"입력 오류: {e}")
