@@ -6,3 +6,8 @@ streamlit_folium
 streamlit
 pandas
 plotly
+
+streamlit
+sympy
+plotly
+numpy
