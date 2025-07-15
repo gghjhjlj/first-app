@@ -11,3 +11,10 @@ streamlit
 sympy
 plotly
 numpy
+
+streamlit
+pandas
+folium
+streamlit-folium
+pycountry
+requests
