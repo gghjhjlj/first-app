@@ -30,6 +30,6 @@ folium
 streamlit-folium
 
 streamlit
+folium
+streamlit-folium
 pandas
-plotly
-
