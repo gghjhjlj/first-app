@@ -4,6 +4,5 @@ pandas
 streamlit_folium
 
 streamlit
-kagglehub
 pandas
 plotly
